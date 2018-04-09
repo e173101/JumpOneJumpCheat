@@ -1,0 +1,2 @@
+# ImgProcessDemo
+lib Qt, OpenCV
