@@ -26,20 +26,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    ../PhoneHackCV/findscreen.cpp \
-    ../PhoneHackCV/jumponejump.cpp
+    findscreen.cpp \
+    jumponejump.cpp
 
 HEADERS += \
         mainwindow.h \
-    ../PhoneHackCV/findscreen.h \
-    ../PhoneHackCV/jumponejump.h
+    PComm.h \
+    findscreen.h \
+    jumponejump.h \
+    PComm.h
+
+LIBS +=  "C:\Program Files\Moxa\PCommLite 1.6\Lib\x86\PCOMM.DLL"
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    mainwindow.ui
 
 
 #OpenCV
 INCLUDEPATH += C:/OpenCV/2.4.13/include
 LIBS += C:/OpenCV/2.4.13_SOURCES/lib/*.dll.a
+
+SUBDIRS += \
+    JumpOneJumpCheat.pro
 
 

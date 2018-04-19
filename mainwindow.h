@@ -36,6 +36,14 @@ private slots:
 
     void on_pushButton_snapShot_clicked();
 
+    void on_pushButton_pushScrean_clicked();
+
+    void on_spinBox_touchms_editingFinished();
+
+    void on_pushButton_push_clicked();
+
+    void on_doubleSpinBox_ratio_editingFinished();
+
 private:
     Ui::MainWindow *ui;
     //recored
@@ -48,16 +56,17 @@ private:
     //
     Mat matFrame;
     Mat screen;
-    //
-    QStateMachine machine;
-    QState *waitSourceState;
-    QState *liveState;
-    QState *recordingState;
 
     FindScreen fs;
     JumpOneJump joj;
     Point guyLoc,benchLoc;
+
+    //searil
+    int serialPort;
     //
+    int length;
+    double ratioLengthToTime;
+    int touchTimeMs;
 };
 
 #endif // MAINWINDOW_H

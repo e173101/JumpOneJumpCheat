@@ -6,63 +6,34 @@
 #include <opencv2/core.hpp>
 
 
+#include "PComm.h"
+
 #define liveWindowName "live"
 #define screenWindowName "IPhone"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    joj(0.45)
+    joj(0.45),
+    serialPort(15)
 {
     ui->setupUi(this);
-
-    //
     cameraIsOk = false;
     //20 fps
     timer.setInterval(50);
     connect(&timer,SIGNAL(timeout()),this,SLOT(timerDo()));
-
-    // State Machine do
-    //   waitResource
-    //   live
-    //   recording
-    //
-
-    //waitsouce
-    waitSourceState = new QState();
-    waitSourceState->assignProperty(ui->pushButton_openCamera, "enabled", true);
-    waitSourceState->assignProperty(ui->pushButton_release, "enabled",false);
-    waitSourceState->assignProperty(ui->pushButton_snapShot, "enabled",false);
-    waitSourceState->assignProperty(ui->comboBox_live, "enabled",false);
-
-    //live
-    liveState = new QState();
-    //live->killTimer(timerID);
-    liveState->assignProperty(ui->pushButton_openCamera, "enabled", false);
-    liveState->assignProperty(ui->pushButton_release, "enabled", true);
-    liveState->assignProperty(ui->pushButton_snapShot, "enabled",true);
-    liveState->assignProperty(ui->comboBox_live, "enabled",true);
-    connect(liveState,SIGNAL(entered()),&timer,SLOT(start()));
-    connect(liveState,SIGNAL(exited()),&timer,SLOT(stop()));
-
-    //State transition
-    waitSourceState->addTransition(this,SIGNAL(liveSignal()),liveState);
-    liveState->addTransition(ui->pushButton_release, SIGNAL(clicked()),waitSourceState);
-    //recording->addTransition(ui->pushButton_Record, SIGNAL(clicked()),live);
-
-    //Init state machin
-    machine.addState(waitSourceState);
-   // machine.addState(recordingState);
-    machine.addState(liveState);
-    machine.setInitialState(waitSourceState);
-    machine.start();
-
+    /* Port Control, enable the port */
+    int ret = sio_open (serialPort);
+    if (ret == SIO_OK) {
+        sio_ioctl (serialPort, B115200, P_NONE | BIT_8 | STOP_1 );
+    }
 }
 
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    sio_close(1);
 }
 
 
@@ -92,6 +63,10 @@ void MainWindow::timerDo(void)
             guyLoc = joj.matchGuy(screen);
             benchLoc = joj.matchBench(guyLoc);
             imshow("cheat",joj.matCooked);
+            length = abs(guyLoc.x-benchLoc.x);
+            touchTimeMs = length*ratioLengthToTime;
+            ui->label_interval->setText(QString::number(length));
+            ui->label_touchms->setText(QString::number(touchTimeMs));
 
         }
 
@@ -112,7 +87,7 @@ void MainWindow::on_pushButton_openCamera_clicked()
         if(cameraIsOk)
         {
             qDebug("good");
-            emit liveSignal();
+            timer.start();
         }
     }
     else
@@ -125,6 +100,7 @@ void MainWindow::on_pushButton_release_clicked()
     {
         camera.release();
         cameraIsOk=false;
+        timer.stop();
     }
 }
 
@@ -144,4 +120,31 @@ void MainWindow::on_pushButton_snapShot_clicked()
     {
         imwrite(imName.toStdString(), screen);
     }
+}
+
+void MainWindow::on_pushButton_pushScrean_clicked()
+{
+    char t[10];
+    t[9]=0;
+    touchTimeMs = ui->spinBox_touchms->value();
+    sprintf(t,"%05dms",touchTimeMs);
+    sio_write(serialPort,t,7);
+}
+
+void MainWindow::on_spinBox_touchms_editingFinished()
+{
+    qDebug("You Edit the touchTime");
+}
+
+void MainWindow::on_pushButton_push_clicked()
+{
+    char t[10];
+    t[9]=0;
+    sprintf(t,"%05dms",touchTimeMs);
+    sio_write(serialPort,t,7);
+}
+
+void MainWindow::on_doubleSpinBox_ratio_editingFinished()
+{
+    ratioLengthToTime = ui->doubleSpinBox_ratio->value();
 }
