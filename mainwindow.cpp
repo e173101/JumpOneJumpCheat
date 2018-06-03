@@ -4,6 +4,7 @@
 #include <QtGui>
 #include <QState>
 #include <opencv2/core.hpp>
+#include <QInputDialog>
 
 
 #include "PComm.h"

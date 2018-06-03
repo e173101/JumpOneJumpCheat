@@ -45,7 +45,9 @@ FORMS += \
 
 #OpenCV
 INCLUDEPATH += C:/OpenCV/2.4.13/include
-LIBS += C:/OpenCV/2.4.13_SOURCES/lib/*.dll.a
+LIBS += C:/OpenCV/2.4.13/lib/lib*.dll.a
+#INCLUDEPATH += C:/OpenCV/3.4.1/include
+#LIBS += C:/OpenCV/3.4.1/lib/lib*.dll.a
 
 SUBDIRS += \
     JumpOneJumpCheat.pro
